@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from './components/ui/Button';
-
+import { Button } from '@/components/ui/button';
 import { auth, db } from './firebase';
 import {
   GoogleAuthProvider,
@@ -17,7 +16,6 @@ import {
   deleteDoc
 } from 'firebase/firestore';
 
-// states
 export default function FlashcardsApp() {
   const [cards, setCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -26,10 +24,7 @@ export default function FlashcardsApp() {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({ front: '', back: '' });
   const [user, setUser] = useState(null);
-
-  // NEW states for "Show All" mode with individual flips
-  const [showAll, setShowAll] = useState(false);
-  const [flippedAll, setFlippedAll] = useState({});
+  const [fontSize, setFontSize] = useState('text-2xl');
 
   const currentCard = cards[currentIndex];
 
@@ -99,7 +94,7 @@ export default function FlashcardsApp() {
       const newCard = { front: formData.front, back: formData.back };
       const docRef = await addDoc(collection(db, 'users', user.uid, 'cards'), newCard);
       setCards([...cards, { id: docRef.id, ...newCard }]);
-      setCurrentIndex(cards.length); // Move to the new card
+      setCurrentIndex(cards.length);
     }
 
     setShowForm(false);
@@ -130,7 +125,7 @@ export default function FlashcardsApp() {
   };
 
   return (
-    <div className="p-4 max-w-4xl mx-auto text-center">
+    <div className="p-4 max-w-md mx-auto text-center">
       <div className="mb-4 space-x-2">
         {user ? (
           <>
@@ -144,56 +139,43 @@ export default function FlashcardsApp() {
 
       {user && (
         <>
-          <div className="mb-4 space-x-2">
-            <Button onClick={() => setShowAll(!showAll)}>
-              {showAll ? 'Show One' : 'Show All'}
-            </Button>
+          <div className="mb-4">
+            <label className="mr-2 font-medium">Font Size:</label>
+            <select
+              className="p-2 border rounded"
+              value={fontSize}
+              onChange={(e) => setFontSize(e.target.value)}
+            >
+              <option value="text-lg">Small</option>
+              <option value="text-xl">Medium</option>
+              <option value="text-2xl">Large</option>
+              <option value="text-3xl">Extra Large</option>
+              <option value="text-4xl">Extra Extra Large</option>
+              <option value="text-5xl">Extra Extra Extra Large</option>
+            </select>
           </div>
 
-          {showAll ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {cards.map((card) => {
-                const isFlipped = flippedAll[card.id] || false;
-                return (
-                  <div
-                    key={card.id}
-                    className="bg-white p-4 rounded-xl shadow-md cursor-pointer select-none"
-                    onClick={() =>
-                      setFlippedAll(prev => ({ ...prev, [card.id]: !prev[card.id] }))
-                    }
-                  >
-                    <h2 className="text-lg font-semibold">
-                      {isFlipped ? card.back : card.front}
-                    </h2>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
+          {cards.length > 0 && (
             <>
-              {cards.length > 0 && (
-                <>
-                  <div
-                    className="bg-white p-6 rounded-xl shadow-md cursor-pointer"
-                    onClick={handleFlip}
-                  >
-                    <h2 className="text-xl font-semibold">
-                      {flipped ? currentCard.back : currentCard.front}
-                    </h2>
-                  </div>
-                  <div className="mt-4 space-x-2">
-                    <Button onClick={handlePrev}>Previous</Button>
-                    <Button onClick={handleNext}>Next</Button>
-                    <Button onClick={handleShuffle}>Shuffle</Button>
-                  </div>
-                </>
-              )}
+              <div
+                className={`bg-white p-10 ${fontSize} rounded-2xl shadow-lg cursor-pointer`}
+                onClick={handleFlip}
+              >
+                <h2 className="font-bold">
+                  {flipped ? currentCard.back : currentCard.front}
+                </h2>
+              </div>
+              <div className="mt-4 space-x-2">
+                <Button onClick={handlePrev}>Previous</Button>
+                <Button onClick={handleNext}>Next</Button>
+                <Button onClick={handleShuffle}>Shuffle</Button>
+              </div>
             </>
           )}
 
           <div className="mt-4 space-x-2">
             <Button onClick={handleAddCard}>Add</Button>
-            {cards.length > 0 && !showAll && (
+            {cards.length > 0 && (
               <>
                 <Button onClick={handleEditCard}>Edit</Button>
                 <Button onClick={handleDeleteCard}>Delete</Button>
@@ -204,14 +186,14 @@ export default function FlashcardsApp() {
       )}
 
       {user && showForm && (
-        <form onSubmit={handleFormSubmit} className="mt-6 bg-gray-100 p-4 rounded max-w-md mx-auto">
+        <form onSubmit={handleFormSubmit} className="mt-6 bg-gray-100 p-4 rounded">
           <div className="mb-2">
             <input
               type="text"
               placeholder="Front"
               value={formData.front}
               onChange={(e) => setFormData({ ...formData, front: e.target.value })}
-              className="w-full p-2 rounded border"
+              className="w-full p-2 rounded border text-lg"
               required
             />
           </div>
@@ -221,7 +203,7 @@ export default function FlashcardsApp() {
               placeholder="Back"
               value={formData.back}
               onChange={(e) => setFormData({ ...formData, back: e.target.value })}
-              className="w-full p-2 rounded border"
+              className="w-full p-2 rounded border text-lg"
               required
             />
           </div>
