@@ -17,6 +17,7 @@ import {
   deleteDoc
 } from 'firebase/firestore';
 
+// states
 export default function FlashcardsApp() {
   const [cards, setCards] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
